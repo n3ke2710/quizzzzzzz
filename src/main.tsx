@@ -10,12 +10,19 @@ function Projector() {
   return <Screen view={view} connected={connected} />;
 }
 
-const route = resolveAppRoute(window.location.pathname, window.location.hash);
-const canonical = new URL(appUrl(route), window.location.origin);
-canonical.search = window.location.search;
-if (`${window.location.pathname}${window.location.hash}` !== `${canonical.pathname}${canonical.hash}`) {
-  window.history.replaceState(null, '', `${canonical.pathname}${canonical.search}${canonical.hash}`);
+const root = createRoot(document.getElementById('root')!);
+
+function renderCurrentRoute() {
+  const route = resolveAppRoute(window.location.pathname, window.location.hash);
+  const canonical = new URL(appUrl(route), window.location.origin);
+  canonical.search = window.location.search;
+  if (`${window.location.pathname}${window.location.hash}` !== `${canonical.pathname}${canonical.hash}`) {
+    window.history.replaceState(null, '', `${canonical.pathname}${canonical.search}${canonical.hash}`);
+  }
+  const isScreen = route === 'screen';
+  document.title = isScreen ? 'Своя игра — экран зрителей' : 'Своя игра — пульт ведущего';
+  root.render(isScreen ? <Projector /> : <Host />);
 }
-const isScreen = route === 'screen';
-document.title = isScreen ? 'Своя игра — экран зрителей' : 'Своя игра — пульт ведущего';
-createRoot(document.getElementById('root')!).render(isScreen ? <Projector /> : <Host />);
+
+window.addEventListener('hashchange', renderCurrentRoute);
+renderCurrentRoute();
